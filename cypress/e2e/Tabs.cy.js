@@ -4,7 +4,6 @@ describe('Child Tabs', () => {
         cy.visit("https://the-internet.herokuapp.com/windows");
         cy.get("a[href='/windows/new']").invoke('removeAttr', 'target');
         cy.get("a[href='/windows/new']").click();
-        cy.wait(5000);
         cy.url().should('include', "/windows/new");
         cy.go('back');  // back to parent
 
@@ -17,7 +16,6 @@ describe('Child Tabs', () => {
             let newUrl = e.prop('href');
             cy.visit(newUrl);
         });
-        cy.wait(5000);
         cy.url().should('include', "/windows/new");
         cy.go('back'); 
     });
