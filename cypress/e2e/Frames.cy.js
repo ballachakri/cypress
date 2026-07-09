@@ -1,5 +1,5 @@
 describe('Handling frames', () => {
-    it.skip("using method", () => {
+    it("using method", () => {
 
         cy.visit("https://the-internet.herokuapp.com/iframe");
 
@@ -12,7 +12,7 @@ describe('Handling frames', () => {
         iframe.clear().type("Hello World ! {ctrl+a}");
     });
 
-    it.only("Using Custom command", () => {
+    it("Using Custom command", () => {
 
         cy.visit("https://the-internet.herokuapp.com/iframe");
 
@@ -23,7 +23,7 @@ describe('Handling frames', () => {
     })
 
     // npm install -D cypress-iframe
-    it.skip("Using iframe plug in", () => {
+    it("Using iframe plug in", () => {
         cy.visit("https://the-internet.herokuapp.com/iframe");
         cy.frameLoaded("iframe[id='mce_0_ifr']")
         cy.get("div[aria-label='Close']").click();

@@ -1,6 +1,6 @@
 describe('Child Tabs', () => {
 
-    it.skip('handle tabs 2', () => {
+    it('handle tabs 2', () => {
         cy.visit("https://the-internet.herokuapp.com/windows");
         cy.get("a[href='/windows/new']").invoke('removeAttr', 'target');
         cy.get("a[href='/windows/new']").click();

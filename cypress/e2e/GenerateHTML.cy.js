@@ -6,7 +6,7 @@ describe('HTML report' , ()=>{
     // 2.     edit config file (cypress.config.js)
 
 
-    it('HTML test report', ()=>{
+    it.skip('HTML test report', ()=>{
 
     })
 })
