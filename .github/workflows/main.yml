@@ -1,35 +1,35 @@
 name: Cypress Tests
 
 on: 
-  push:
-  workflow_dispatch:
+    push:
+    workflow_dispatch:
 
 jobs:
   cypress-run:
     runs-on: ubuntu-24.04
-    statergy:
+    strategy:
         fail-fast: false
         matrix:
-          browsers: [chrome, firefox, edge]
+            browsers: [chrome, firefox, edge]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
       # Install npm dependencies, cache them correctly
       # and run all Cypress tests
       - name: Cypress run in ${{ matrix.browsers }}
-        uses: cypress-io/github-action@v7
+        uses: cypress-io/github-action@v6
         with:
-          browsers: ${{ matrix.browsers }}
-          command: npx cypres run --browser ${{ matrix.browser}} --reporter-options reportDir=cypress/reports ${{ matrix.browsers}}
+            browsers: ${{ matrix.browsers }}
+            command: npx cypress run --browser ${{ matrix.browsers }} --reporter-options reportDir=cypress/reports/${{ matrix.browsers }}
+        
+      - name: Merge Mochawesome Reports
+        run: npx mochawesome-merge cypress/reports/${{ matrix.browsers }}/*.json > cypress/reports/${{ matrix.browsers }}/merged-reports.json
 
-      - name: Merge Mochawesome reports
-        run: npx mochawesome-merge cypress/reports/$${{ matrix.browsers }}/*.json > cypress/reports/${{ matrix.browsers }}/merged-reports.json
+      - name: Generate HTML Reports
+        run: npx marge cypress/reports/${{ matrix.browsers }}/merged-reports.json --reportDir cypress/reports/${{ matrix.browsers }} -f "${{ matrix.browsers }}-report.html"
 
-      - name: Generate HTML reports
-        run: npx merge cypress/reports/$${{ matrix.browsers }}/merged-reports.json --reportDir cypress/reports/${{ matrix.browsers }} -f "${{ matrix.browsers }}-report.html"
-
-      - name: Upload HTML reports
+      - name: Upload HTML Reports
         uses: actions/upload-artifact@v4
         with:
-            name: Cypress HTML Report ${{ matrix.browsers}}
-            path: cypress/reports/${{ matirx.browsers }}
+            name: Cypress HTML Report ${{ matrix.browsers }}
+            path: cypress/reports/${{ matrix.browsers }}
