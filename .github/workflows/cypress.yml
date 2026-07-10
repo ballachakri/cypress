@@ -49,8 +49,8 @@ jobs:
         if: always() && hashFiles('cypress/videos/**') != ''
         uses: actions/upload-artifact@v4
         with:
-        name: cypress-videos
-        path: cypress/videos
+           name: cypress-videos
+           path: cypress/videos
 
       - name: Show generated files
         if: always()
