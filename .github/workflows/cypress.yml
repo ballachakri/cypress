@@ -31,9 +31,21 @@ jobs:
         run: npm run cy:run
         continue-on-error: true
 
-      - name: Merge Cypress reports
+      - name: Debug reports
         if: always()
-        run: npm run report:merge
+        run: |
+          echo "===== REPORTS ====="
+          ls -R cypress/reports || true
+
+          echo "===== ALL CYPRESS FILES ====="
+          find cypress -type f
+
+          echo "===== JSON FILES ====="
+          find . -name "*.json"
+
+      # - name: Merge Cypress reports
+      #   if: always()
+      #   run: npm run report:merge
 
       - name: Generate HTML report
         if: always()
@@ -55,10 +67,16 @@ jobs:
           path: cypress/videos
           retention-days: 14
 
-      - name: Upload Cypress HTML report
+      - name: Upload report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: cypress-report
-          path: cypress/reports/html
+          path: cypress/reports
           retention-days: 14
+
+      - name: Show generated files
+        if: always()
+        run: |
+          echo "=== Reports ==="
+          find cypress -type f
