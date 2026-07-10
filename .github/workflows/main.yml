@@ -16,32 +16,44 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Cypress Run (${{ matrix.browser }})
+      - name: Cypress Run
+        id: cypress
+        continue-on-error: true
         uses: cypress-io/github-action@v6
         with:
-          browser: ${{ matrix.browser }}
           command: >
             npx cypress run
             --browser ${{ matrix.browser }}
             --reporter mochawesome
-            --reporter-options
-            reportDir=cypress/reports/${{ matrix.browser }},overwrite=false,html=false,json=true
+            --reporter-options reportDir=cypress/reports/${{ matrix.browser }},overwrite=false,html=false,json=true
+
+      - name: List generated reports
+        if: always()
+        run: |
+          echo "Reports:"
+          find cypress/reports -type f || true
 
       - name: Merge Mochawesome Reports
+        if: always()
         run: |
-          npx mochawesome-merge \
-          cypress/reports/${{ matrix.browser }}/*.json \
+          npx mochawesome-merge cypress/reports/${{ matrix.browser }}/*.json \
           > cypress/reports/${{ matrix.browser }}/merged-report.json
 
       - name: Generate HTML Report
+        if: always()
         run: |
           npx marge \
-          cypress/reports/${{ matrix.browser }}/merged-report.json \
-          --reportDir cypress/reports/${{ matrix.browser }} \
-          --reportFilename "${{ matrix.browser }}-report"
+            cypress/reports/${{ matrix.browser }}/merged-report.json \
+            --reportDir cypress/reports/${{ matrix.browser }} \
+            --reportFilename "${{ matrix.browser }}-report"
 
       - name: Upload Report
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: Cypress-${{ matrix.browser }}-Report
           path: cypress/reports/${{ matrix.browser }}
+
+      - name: Fail job if Cypress failed
+        if: steps.cypress.outcome == 'failure'
+        run: exit 1
