@@ -2,7 +2,6 @@ import LoginPage from "../PageObjects/LoginPage.js"
 
 describe('', ()=> {
     // 1. Simple type
-
     // it('User Login', ()=>{
     //     cy.visit("https://tutorialsninja.com/demo/");
     //     const login = new LoginPage();
@@ -14,7 +13,7 @@ describe('', ()=> {
     //     login.verifyLogin();
     // })
 
-    // //2. Enhanced type
+    // //2. Normal type
     // it('User Login', ()=>{
     //     cy.visit("https://tutorialsninja.com/demo/");
     //     const login = new LoginPage();
