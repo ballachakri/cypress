@@ -4,8 +4,8 @@ module.exports = defineConfig({
   reporter: "cypress-mochawesome-reporter",
   reporterOptions: {
     reportDir: "cypress/reports",
-    overwrite: false,
-    html: true,
+    overwrite: true, // ✅ Ensures one report per run
+    html: true,      // ✅ Auto-generates single HTML at end
     json: true,
     embeddedScreenshots: true,
     inlineAssets: true,

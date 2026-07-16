@@ -1,31 +1,26 @@
-name: Cypress API Tests
+name: Cypress Tests
 on: [push, pull_request]
 
 jobs:
-  run-tests:
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
-
-      - name: Install dependencies
-        run: npm ci
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 20, cache: 'npm' }
+      - run: npm ci
 
       - name: Clean old reports
         run: rm -rf cypress/reports
 
-      - name: Run tests & generate single report
+      - name: Run tests (auto-generates single HTML report)
         run: npm run test:ci
+        env:
+          CI: true
 
-      - name: Upload final test report
+      - name: Upload single HTML report
         uses: actions/upload-artifact@v4
         with:
           name: cypress-test-report
-          path: cypress/reports/final/index.html
+          path: cypress/reports/index.html
           retention-days: 14
