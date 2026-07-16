@@ -13,14 +13,18 @@ jobs:
       - name: Clean old reports
         run: rm -rf cypress/reports
 
-      - name: Run tests (auto-generates single HTML report)
+      - name: Run tests & generate report
         run: npm run test:ci
-        env:
-          CI: true
+        env: { CI: true }
 
-      - name: Upload single HTML report
+      - name: Debug — list generated files
+        if: always()
+        run: ls -la cypress/reports
+
+      - name: Upload final HTML report
+        if: always() # ✅ Runs even if tests fail
         uses: actions/upload-artifact@v4
         with:
           name: cypress-test-report
-          path: cypress/reports/index.html
+          path: cypress/reports/index.html # ✅ Exact path
           retention-days: 14

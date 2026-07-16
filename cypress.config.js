@@ -4,8 +4,8 @@ module.exports = defineConfig({
   reporter: "cypress-mochawesome-reporter",
   reporterOptions: {
     reportDir: "cypress/reports",
-    overwrite: true, // ✅ Ensures one report per run
-    html: true,      // ✅ Auto-generates single HTML at end
+    overwrite: true, // ✅ Ensures single index.html per run
+    html: true,      // ✅ Auto-generates HTML
     json: true,
     embeddedScreenshots: true,
     inlineAssets: true,
@@ -15,7 +15,7 @@ module.exports = defineConfig({
 
   e2e: {
     setupNodeEvents(on, config) {
-      require("cypress-mochawesome-reporter/plugin")(on);
+      require("cypress-mochawesome-reporter/plugin")(on); // ✅ Required
       return config;
     }
   }
