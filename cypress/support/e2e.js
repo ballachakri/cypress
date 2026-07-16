@@ -22,4 +22,12 @@ require("@4tw/cypress-drag-drop")
 require("cypress-file-upload")
 import 'cypress-mochawesome-reporter/register'
 
-
+afterEach(() => {
+  const testName = Cypress.currentTest.title.replace(/\s+/g, '-').toLowerCase();
+  
+  // Take full-page screenshot & attach directly to the report
+  cy.screenshot(`end-of-test--${testName}`, {
+    capture: 'fullPage',
+    overwrite: true
+  });
+});

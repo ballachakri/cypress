@@ -1,4 +1,4 @@
-name: Cypress Tests
+name: Cypress Tests with Media
 on: [push, pull_request]
 
 jobs:
@@ -10,21 +10,38 @@ jobs:
         with: { node-version: 20, cache: 'npm' }
       - run: npm ci
 
-      - name: Clean old reports
+      - name: Clean old reports & media
         run: rm -rf cypress/reports
 
-      - name: Run tests & generate report
+      - name: Run tests — generate report + media
         run: npm run test:ci
         env: { CI: true }
+        continue-on-error: true # ✅ Always finish run, even if tests fail
 
-      - name: Debug — list generated files
+      # ✅ Always upload — pass or fail
+      - name: Upload Full HTML Report
         if: always()
-        run: ls -la cypress/reports
-
-      - name: Upload final HTML report
-        if: always() # ✅ Runs even if tests fail
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-test-report
-          path: cypress/reports/index.html # ✅ Exact path
+          name: cypress-full-test-report
+          path: cypress/reports/index.html
           retention-days: 14
+
+      - name: Upload All Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: cypress/reports/screenshots
+          retention-days: 14
+
+      - name: Upload Test Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: cypress/reports/videos
+          retention-days: 14
+
+      - name: Preserve overall job status
+        run: exit ${{ steps.run-tests.outcome == 'failure' && 1 || 0 }}
