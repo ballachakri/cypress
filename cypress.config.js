@@ -1,37 +1,35 @@
-const { defineConfig } = require("cypress");
+const { defineConfig } = require('cypress');
+const { beforeRun } = require('cypress-mochawesome-reporter/plugin');
 
 module.exports = defineConfig({
-  // Video recording settings
-  video: true,
-  videosFolder: "cypress/reports/videos",
-  videoCompression: 32,
-  videoUploadOnPasses: true, // ✅ Record videos for ALL tests (pass + fail)
+  e2e: {
+    baseUrl: 'https://reqres.in/api',
+    specPattern: 'cypress/e2e/**/*.cy.js',
+    supportFile: 'cypress/support/e2e.js', // ✅ Required for mochawesome reporter
+    setupNodeEvents(on, config) {
+      // ✅ Mochawesome reporter setup
+      beforeRun(on, config);
+      
+      // ✅ Screenshots & Videos go to reports folder
+      config.screenshotsFolder = 'cypress/reports/screenshots';
+      config.videosFolder = 'cypress/reports/videos';
+      return config;
+    },
+  },
 
-  // Screenshot settings
-  screenshotsFolder: "cypress/reports/screenshots",
-  screenshotOnRunFailure: true,
-
-  reporter: "cypress-mochawesome-reporter",
+  reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
-    reportDir: "cypress/reports",
+    reportDir: 'cypress/reports',
+    reportName: 'index',
     overwrite: true,
     html: true,
     json: true,
-    embeddedScreenshots: true, // ✅ Inline screenshots inside the HTML
-    inlineAssets: true,        // ✅ Embed videos/assets directly into report
     charts: true,
-    saveAllAttempts: false,
-    // ✅ Auto-attach screenshot at end of EVERY test
-    screenshotsOverwrite: true,
-    autoAttachScreenshots: true,
-    // ✅ Attach video links/embeds to report
-    attachVideos: true
+    reportPageTitle: 'Cypress Test Report'
   },
 
-  e2e: {
-    setupNodeEvents(on, config) {
-      require("cypress-mochawesome-reporter/plugin")(on);
-      return config;
-    }
-  }
+  screenshotsOnRunFailure: true,
+  screenshotQuality: 80,
+  video: true,
+  videoCompression: 32
 });

@@ -1,21 +1,34 @@
 name: Cypress Tests with Media
-on: [push, pull_request]
+
+on:
+  push:
+    branches: [main, develop, master]
+  pull_request:
+    branches: [main, develop, master]
+  schedule:
+    - cron: '0 4 * * *' # Daily at 04:00 UTC
 
 jobs:
   test:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
-        with: { node-version: 20, cache: 'npm' }
+        with:
+          node-version: 20
+          cache: 'npm'
+
       - run: npm ci
 
       - name: Clean old reports & media
-        run: rm -rf cypress/reports
+        run: rm -rf cypress/reports cypress/screenshots cypress/videos
 
       - name: Run tests — generate report + media
-        run: npm run test:ci
-        env: { CI: true }
+        id: run-tests
+        run: npm run test-ci # ✅ Matches YOUR script name!
+        env:
+          CI: true
         continue-on-error: true # ✅ Always finish run, even if tests fail
 
       # ✅ Always upload — pass or fail
@@ -24,7 +37,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: cypress-full-test-report
-          path: cypress/reports/index.html
+          path: cypress/reports/html/index.html # ✅ Mochawesome default path
           retention-days: 14
 
       - name: Upload All Screenshots

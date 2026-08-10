@@ -1,0 +1,19 @@
+node_modules/
+package-lock.json
+npm-debug.log*
+
+# Cypress generated files
+cypress/reports/
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+
+# Environment & secrets
+.env
+.env.local
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

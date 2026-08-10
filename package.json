@@ -7,19 +7,23 @@
   "type": "commonjs",
   "main": "index.js",
   "scripts": {
-    "cy:run": "cypress run",
-    "test:ci": "npm run cy:run"
+
+    "cy-clean": "if exist cypress\\reports rmdir /s /q cypress\\reports && if exist cypress\\screenshots rmdir /s /q cypress\\screenshots && if exist cypress\\videos rmdir /s /q cypress\\videos",
+    "cy-open": "npm run cy-clean && cypress open",
+    "cy-run": "npm run cy-clean && cypress run",
+    "cy-run-report": "npm run cy-run && start cypress\\reports\\index.html",
+    "test-ci": "cypress run"
   },
   "dependencies": {
-    "cypress": "^15.14.2"
+    "cypress": "^15.19.0"
   },
   "devDependencies": {
     "@4tw/cypress-drag-drop": "^2.3.1",
     "cypress-file-upload": "^5.0.8",
     "cypress-iframe": "^1.0.1",
-    "cypress-mochawesome-reporter": "^4.0.2",
+    "cypress-mochawesome-reporter": "^5.0.0",
     "cypress-xpath": "^2.0.1",
-    "mochawesome": "^7.1.4",
+    "mochawesome": "^8.0.1",
     "mochawesome-merge": "^5.1.1",
     "mochawesome-report-generator": "^6.3.2"
   }

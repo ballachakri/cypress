@@ -15,11 +15,11 @@ class LoginPage {
         cy.get(this.loginTab).click();
     }
 
-    setEmail(email) {
+    enterUserEmail(email) {
         cy.get(this.emailTextField).type(email);
     }
 
-    setUserPassword(password) {
+    enterUserPassword(password) {
         cy.get(this.passwordTextField).type(password);
     }
 
