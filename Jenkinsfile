@@ -1,53 +1,79 @@
-pipeline {
-    agent any
+name: Cypress Tests with Media
 
-    tools {
-        nodejs 'NodeJS-LTS'
-    }
+on:
+  push:
+    branches: [main, develop, master]
+  pull_request:
+    branches: [main, develop, master]
+  schedule:
+    - cron: '0 4 * * *' # Daily at 04:00 UTC
 
-    options {
-        buildDiscarder(logRotator(numToKeepStr: '15'))
-    }
+jobs:
+  test:
+    runs-on: ubuntu-latest
 
-    stages {
-        stage('Checkout Code') {
-            steps { checkout scm }
-        }
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
 
-        stage('Install Dependencies') {
-            steps { bat 'npm ci' }
-        }
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
-        stage('Clean Old Reports & Media') {
-            steps { bat 'npm run cy-clean' }
-        }
+    steps:
+      - uses: actions/checkout@v4
 
-        stage('Run Cypress Tests') {
-            steps {
-                bat 'npm run test-ci'
-            }
-            post {
-                always {
-                    archiveArtifacts artifacts: 'cypress/reports/html/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress/reports/screenshots/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress/reports/videos/**/*', allowEmptyArchive: true
-                }
-            }
-        }
-    }
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
 
-    post {
-        always {
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'cypress/reports/html',
-                reportFiles: 'index.html',
-                reportName: 'Cypress Test Report'
-            ])
-        }
-        success { echo '✅ All tests passed!' }
-        failure { echo '❌ Check reports below.' }
-    }
-}
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Clean old reports & media
+        run: rm -rf cypress/reports cypress/screenshots cypress/videos
+
+      - name: Run Cypress Tests
+        id: run-tests
+        run: npm run test-ci
+        env:
+          CI: true
+        continue-on-error: true
+
+      # ✅ DEPLOY LIVE REPORT TO GITHUB PAGES
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload Report to GitHub Pages
+        if: always()
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: cypress/reports/html
+
+      - name: Deploy Live Report
+        id: deployment
+        if: always()
+        uses: actions/deploy-pages@v4
+
+      # ✅ Keep screenshots & videos as downloadable artifacts
+      - name: Upload All Screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-screenshots
+          path: cypress/reports/screenshots
+          retention-days: 14
+
+      - name: Upload Test Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-videos
+          path: cypress/reports/videos
+          retention-days: 14
+
+      - name: Preserve overall job status
+        run: exit ${{ steps.run-tests.outcome == 'failure' && 1 || 0 }}

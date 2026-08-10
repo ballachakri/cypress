@@ -14,9 +14,9 @@ module.exports = defineConfig({
     },
   },
 
-  reporter: 'cypress-mochawesome-reporter',
+ reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
-    reportDir: 'cypress/reports',
+    reportDir: 'cypress/reports/html', // ✅ MUST match workflow path!
     reportName: 'index',
     overwrite: true,
     html: true,
