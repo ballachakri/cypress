@@ -1,16 +1,13 @@
 const { defineConfig } = require('cypress');
-const { beforeRun } = require('cypress-mochawesome-reporter/plugin');
 
 module.exports = defineConfig({
   e2e: {
     baseUrl: 'https://reqres.in/api',
     specPattern: 'cypress/e2e/**/*.cy.js',
-    supportFile: 'cypress/support/e2e.js', // ✅ Required for mochawesome reporter
+    supportFile: 'cypress/support/e2e.js',
+    
     setupNodeEvents(on, config) {
-      // ✅ Mochawesome reporter setup
-      beforeRun(on, config);
-      
-      // ✅ Screenshots & Videos go to reports folder
+      // ✅ SIMPLIFIED — removed problematic beforeRun() call
       config.screenshotsFolder = 'cypress/reports/screenshots';
       config.videosFolder = 'cypress/reports/videos';
       return config;
@@ -24,8 +21,7 @@ module.exports = defineConfig({
     overwrite: true,
     html: true,
     json: true,
-    charts: true,
-    reportPageTitle: 'Cypress Test Report'
+    charts: true
   },
 
   screenshotsOnRunFailure: true,
