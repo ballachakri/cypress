@@ -1,9 +1,8 @@
 pipeline {
     agent any
 
-    // ✅ Use BRAND NEW unique name — NO conflict! Jenkins AUTO-DOWNLOADS it!
     tools {
-        nodejs 'NodeJS-24-Auto' // ⭐ EXACT name from Step 1!
+        nodejs 'NodeJS-24-Auto'
     }
 
     options {
@@ -16,13 +15,12 @@ pipeline {
 
     environment {
         REPORTS_DIR = 'cypress/reports'
-        // ✅ NO manual PATH needed! Jenkins sets it UP automatically!
     }
 
     stages {
         stage('Verify Node Version') {
             steps {
-                bat 'node --version' // ✅ Jenkins downloaded 24.x.x!
+                bat 'node --version'
                 bat 'npm --version'
             }
         }
@@ -69,33 +67,34 @@ pipeline {
             }
             post {
                 always {
-                    archiveArtifacts artifacts: 'cypress/reports/html/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress/reports/screenshots/**/*', allowEmptyArchive: true
-                    archiveArtifacts artifacts: 'cypress/reports/videos/**/*', allowEmptyArchive: true
+                    script {
+                        // ✅ ARCHIVE ARTIFACTS EVEN IF TESTS FAIL
+                        archiveArtifacts artifacts: 'cypress/reports/html/**/*', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'cypress/reports/screenshots/**/*', allowEmptyArchive: true
+                        archiveArtifacts artifacts: 'cypress/reports/videos/**/*', allowEmptyArchive: true
+                    }
                 }
-            }
-        }
-
-        stage('Publish HTML Report') {
-            steps {
-                publishHTML([
-                    allowMissing: true,
-                    alwaysLinkToLastBuild: true,
-                    keepAll: true,
-                    reportDir: 'cypress/reports/html',
-                    reportFiles: 'index.html',
-                    reportName: 'Cypress Test Report'
-                ])
             }
         }
     }
 
+    // ✅ PUBLISH REPORT HERE — RUNS ALWAYS! PASS OR FAIL!
     post {
+        always {
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'cypress/reports/html',
+                reportFiles: 'index.html',
+                reportName: 'Cypress Test Report'
+            ])
+        }
         success {
             echo '✅ All tests passed! Report generated successfully.'
         }
         failure {
-            echo '⚠️ Some tests failed — Check report below for details.'
+            echo '⚠️ Some tests failed — Report still published below.'
         }
     }
 }
