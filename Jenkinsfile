@@ -1,5 +1,5 @@
 pipeline {
-    agent any
+    agent any  // ✅ Ensures we have a workspace context
 
     tools {
         nodejs 'NodeJS-LTS'
@@ -10,7 +10,7 @@ pipeline {
     }
 
     triggers {
-        cron('0 4 * * *') // ✅ Jenkins cron syntax — NO colon, NO quotes around key!
+        cron('0 4 * * *')
     }
 
     environment {
@@ -42,7 +42,7 @@ pipeline {
                     if (isUnix()) {
                         sh 'rm -rf cypress/reports cypress/screenshots cypress/videos'
                     } else {
-                          bat 'if exist cypress\\reports rmdir /s /q cypress\\reports & if exist cypress\\screenshots rmdir /s /q cypress\\screenshots & if exist cypress\\videos rmdir /s /q cypress\\videos'
+                        bat 'if exist cypress\\reports rmdir /s /q cypress\\reports & if exist cypress\\screenshots rmdir /s /q cypress\\screenshots & if exist cypress\\videos rmdir /s /q cypress\\videos'
                     }
                 }
             }
@@ -66,24 +66,28 @@ pipeline {
                 }
             }
         }
+
+        // ✅ PUBLISH REPORT INSIDE A STAGE — GUARANTEED WORKSPACE CONTEXT
+        stage('Publish HTML Report') {
+            steps {
+                publishHTML([
+                    allowMissing: true,
+                    alwaysLinkToLastBuild: true,
+                    keepAll: true,
+                    reportDir: 'cypress/reports/html',
+                    reportFiles: 'index.html',
+                    reportName: 'Cypress Test Report'
+                ])
+            }
+        }
     }
 
     post {
-        always {
-            publishHTML([
-                allowMissing: true,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'cypress/reports/html',
-                reportFiles: 'index.html',
-                reportName: 'Cypress Test Report'
-            ])
-        }
         success {
             echo '✅ All tests passed! Report generated successfully.'
         }
         failure {
-            echo '⚠️ Some tests failed — Report still generated with screenshots & videos.'
+            echo '⚠️ Some tests failed — Check report below for details.'
         }
     }
 }
