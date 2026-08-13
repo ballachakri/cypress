@@ -2,21 +2,19 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   e2e: {
-    baseUrl: 'https://reqres.in/api',
+    // ✅ baseUrl REMOVED — each test uses its own full URL
     specPattern: 'cypress/e2e/**/*.cy.js',
     supportFile: 'cypress/support/e2e.js',
-    
     setupNodeEvents(on, config) {
-      // ✅ SIMPLIFIED — removed problematic beforeRun() call
       config.screenshotsFolder = 'cypress/reports/screenshots';
       config.videosFolder = 'cypress/reports/videos';
       return config;
     },
   },
 
- reporter: 'cypress-mochawesome-reporter',
+  reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
-    reportDir: 'cypress/reports/html', // ✅ MUST match workflow path!
+    reportDir: 'cypress/reports',
     reportName: 'index',
     overwrite: true,
     html: true,
