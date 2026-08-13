@@ -1,79 +1,89 @@
-name: Cypress Tests with Media
+pipeline {
+    agent any
 
-on:
-  push:
-    branches: [main, develop, master]
-  pull_request:
-    branches: [main, develop, master]
-  schedule:
-    - cron: '0 4 * * *' # Daily at 04:00 UTC
+    tools {
+        nodejs 'NodeJS-LTS'
+    }
 
-jobs:
-  test:
-    runs-on: ubuntu-latest
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '15'))
+    }
 
-    permissions:
-      contents: read
-      pages: write
-      id-token: write
+    triggers {
+        cron('0 4 * * *') // ✅ Jenkins cron syntax — NO colon, NO quotes around key!
+    }
 
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    environment {
+        REPORTS_DIR = 'cypress/reports'
+    }
 
-    steps:
-      - uses: actions/checkout@v4
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
-          cache: 'npm'
+        stage('Install Dependencies') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'npm ci'
+                    } else {
+                        bat 'npm ci'
+                    }
+                }
+            }
+        }
 
-      - name: Install dependencies
-        run: npm ci
+        stage('Clean Old Reports & Media') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'rm -rf cypress/reports cypress/screenshots cypress/videos'
+                    } else {
+                        bat 'npm run cy-clean'
+                    }
+                }
+            }
+        }
 
-      - name: Clean old reports & media
-        run: rm -rf cypress/reports cypress/screenshots cypress/videos
+        stage('Run Cypress Tests') {
+            steps {
+                script {
+                    if (isUnix()) {
+                        sh 'npm run test-ci'
+                    } else {
+                        bat 'npm run test-ci'
+                    }
+                }
+            }
+            post {
+                always {
+                    archiveArtifacts artifacts: 'cypress/reports/html/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'cypress/reports/screenshots/**/*', allowEmptyArchive: true
+                    archiveArtifacts artifacts: 'cypress/reports/videos/**/*', allowEmptyArchive: true
+                }
+            }
+        }
+    }
 
-      - name: Run Cypress Tests
-        id: run-tests
-        run: npm run test-ci
-        env:
-          CI: true
-        continue-on-error: true
-
-      # ✅ DEPLOY LIVE REPORT TO GITHUB PAGES
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Report to GitHub Pages
-        if: always()
-        uses: actions/upload-pages-artifact@v3
-        with:
-          path: cypress/reports/html
-
-      - name: Deploy Live Report
-        id: deployment
-        if: always()
-        uses: actions/deploy-pages@v4
-
-      # ✅ Keep screenshots & videos as downloadable artifacts
-      - name: Upload All Screenshots
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-screenshots
-          path: cypress/reports/screenshots
-          retention-days: 14
-
-      - name: Upload Test Videos
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: test-videos
-          path: cypress/reports/videos
-          retention-days: 14
-
-      - name: Preserve overall job status
-        run: exit ${{ steps.run-tests.outcome == 'failure' && 1 || 0 }}
+    post {
+        always {
+            publishHTML([
+                allowMissing: true,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
+                reportDir: 'cypress/reports/html',
+                reportFiles: 'index.html',
+                reportName: 'Cypress Test Report'
+            ])
+        }
+        success {
+            echo '✅ All tests passed! Report generated successfully.'
+        }
+        failure {
+            echo '⚠️ Some tests failed — Report still generated with screenshots & videos.'
+        }
+    }
+}
