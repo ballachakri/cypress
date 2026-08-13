@@ -1,9 +1,7 @@
 pipeline {
-    agent any  // ✅ Ensures we have a workspace context
+    agent any
 
-    tools {
-        nodejs 'NodeJS-LTS'
-    }
+    // ✅ NO tools {} block — uses YOUR system-installed Node 24!
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '15'))
@@ -15,9 +13,18 @@ pipeline {
 
     environment {
         REPORTS_DIR = 'cypress/reports'
+        // ✅ POINTS TO YOUR SYSTEM NODE 24 — matches YOUR server exactly!
+        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
     }
 
     stages {
+        stage('Verify Node Version') {
+            steps {
+                bat 'node --version' // ✅ Will show: v24.18.1
+                bat 'npm --version'
+            }
+        }
+
         stage('Checkout Code') {
             steps {
                 checkout scm
@@ -67,7 +74,6 @@ pipeline {
             }
         }
 
-        // ✅ PUBLISH REPORT INSIDE A STAGE — GUARANTEED WORKSPACE CONTEXT
         stage('Publish HTML Report') {
             steps {
                 publishHTML([
