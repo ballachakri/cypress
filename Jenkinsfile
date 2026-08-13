@@ -42,7 +42,7 @@ pipeline {
                     if (isUnix()) {
                         sh 'rm -rf cypress/reports cypress/screenshots cypress/videos'
                     } else {
-                        bat 'npm run cy-clean'
+                          bat 'if exist cypress\\reports rmdir /s /q cypress\\reports & if exist cypress\\screenshots rmdir /s /q cypress\\screenshots & if exist cypress\\videos rmdir /s /q cypress\\videos'
                     }
                 }
             }
