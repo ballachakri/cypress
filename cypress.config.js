@@ -1,10 +1,14 @@
 const { defineConfig } = require('cypress');
+const { generateMochawesomeReport } = require('cypress-mochawesome-reporter/plugin'); // ✅ ADD THIS
 
 module.exports = defineConfig({
   e2e: {
     specPattern: 'cypress/e2e/**/*.cy.js',
     supportFile: 'cypress/support/e2e.js',
     setupNodeEvents(on, config) {
+      // ✅ THIS LINE GENERATES THE HTML REPORT!
+      generateMochawesomeReport(on, config);
+      
       config.screenshotsFolder = 'cypress/reports/screenshots';
       config.videosFolder = 'cypress/reports/videos';
       return config;
@@ -13,13 +17,13 @@ module.exports = defineConfig({
 
   reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
-    reportDir: 'cypress/reports', // ✅ KEEP SIMPLE — NO trailing slash, NO /html
+    reportDir: 'cypress/reports',
     reportName: 'index',
     overwrite: true,
     html: true,
     json: true,
     charts: true,
-    inlineAssets: true // ✅ HELPS — embeds CSS/JS so report works on GitHub Pages!
+    inlineAssets: true
   },
 
   screenshotsOnRunFailure: true,
