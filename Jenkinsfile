@@ -1,7 +1,10 @@
 pipeline {
     agent any
 
-    // ✅ NO tools {} block — uses YOUR system-installed Node 24!
+    // ✅ Use BRAND NEW unique name — NO conflict! Jenkins AUTO-DOWNLOADS it!
+    tools {
+        nodejs 'NodeJS-24-Auto' // ⭐ EXACT name from Step 1!
+    }
 
     options {
         buildDiscarder(logRotator(numToKeepStr: '15'))
@@ -13,14 +16,13 @@ pipeline {
 
     environment {
         REPORTS_DIR = 'cypress/reports'
-        // ✅ POINTS TO YOUR SYSTEM NODE 24 — matches YOUR server exactly!
-        PATH = "C:\\Program Files\\nodejs;${env.PATH}"
+        // ✅ NO manual PATH needed! Jenkins sets it UP automatically!
     }
 
     stages {
         stage('Verify Node Version') {
             steps {
-                bat 'node --version' // ✅ Will show: v24.18.1
+                bat 'node --version' // ✅ Jenkins downloaded 24.x.x!
                 bat 'npm --version'
             }
         }
