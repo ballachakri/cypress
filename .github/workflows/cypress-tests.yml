@@ -57,7 +57,7 @@ jobs:
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: cypress/reports  # ⭐ TEMPORARY — WE'LL CHANGE AFTER SEEING OUTPUT
+          path: cypress/reports/html  # ⭐ TEMPORARY — WE'LL CHANGE AFTER SEEING OUTPUT
 
       - name: Deploy Live Report
         id: deployment
