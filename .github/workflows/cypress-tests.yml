@@ -43,17 +43,21 @@ jobs:
           CI: true
         continue-on-error: true
 
-      # 🔍 DEBUG: See EXACTLY what was created
-      - name: List report files
+      # 🔍 CRITICAL: LIST ALL FILES — SEE EXACTLY WHERE REPORT IS
+      - name: List ALL generated files
         if: always()
-        run: ls -laR cypress/reports/
+        run: |
+          echo "=== Cypress folder structure ==="
+          find cypress -type f -name "*.html" || echo "NO HTML FILE FOUND"
+          echo "=== Full listing ==="
+          ls -laR cypress/
 
-      # ✅ UPLOAD FROM CORRECT FOLDER — /html!
+      # ✅ WE WILL UPDATE THIS PATH AFTER SEEING THE LIST!
       - name: Upload Report to GitHub Pages
         if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: cypress/reports/html  # ⭐ CRITICAL — index.html lives HERE!
+          path: cypress/reports  # ⭐ TEMPORARY — WE'LL CHANGE AFTER SEEING OUTPUT
 
       - name: Deploy Live Report
         id: deployment

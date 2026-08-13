@@ -2,7 +2,6 @@ const { defineConfig } = require('cypress');
 
 module.exports = defineConfig({
   e2e: {
-    // ✅ baseUrl REMOVED — each test uses its own full URL
     specPattern: 'cypress/e2e/**/*.cy.js',
     supportFile: 'cypress/support/e2e.js',
     setupNodeEvents(on, config) {
@@ -14,16 +13,15 @@ module.exports = defineConfig({
 
   reporter: 'cypress-mochawesome-reporter',
   reporterOptions: {
-    reportDir: 'cypress/reports',
+    reportDir: 'cypress/reports', // ✅ KEEP SIMPLE — NO trailing slash, NO /html
     reportName: 'index',
     overwrite: true,
     html: true,
     json: true,
-    charts: true
+    charts: true,
+    inlineAssets: true // ✅ HELPS — embeds CSS/JS so report works on GitHub Pages!
   },
 
   screenshotsOnRunFailure: true,
-  screenshotQuality: 80,
-  video: true,
-  videoCompression: 32
+  video: true
 });
