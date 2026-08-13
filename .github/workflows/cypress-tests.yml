@@ -6,7 +6,7 @@ on:
   pull_request:
     branches: [main, develop, master]
   schedule:
-    - cron: '0 4 * * *' # Daily at 04:00 UTC
+    - cron: '0 4 * * *'
 
 jobs:
   test:
@@ -33,7 +33,7 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      - name: Clean old reports & media
+      - name: Clean old reports
         run: rm -rf cypress/reports cypress/screenshots cypress/videos
 
       - name: Run Cypress Tests
@@ -41,39 +41,44 @@ jobs:
         run: npm run test-ci
         env:
           CI: true
-        continue-on-error: true
+        continue-on-error: true # ⭐ KEEP RUNNING EVEN IF TESTS FAIL!
 
-      # ✅ UPLOAD LIVE REPORT TO GITHUB PAGES
-      - name: Setup GitHub Pages
-        uses: actions/configure-pages@v4
-
-      - name: Upload Report to Pages
-        if: always()
+      # ⭐ UPLOAD & DEPLOY RUNS REGARDLESS OF PASS/FAIL!
+      - name: Upload Report to GitHub Pages
+        if: always() # ⭐ ALWAYS RUN — PASS OR FAIL!
         uses: actions/upload-pages-artifact@v3
         with:
-          path: cypress/reports/html
+          path: cypress/reports
 
       - name: Deploy Live Report
         id: deployment
-        if: always()
+        if: always() # ⭐ ALWAYS DEPLOY!
         uses: actions/deploy-pages@v4
 
-      # ✅ Keep downloadable screenshots & videos
-      - name: Upload All Screenshots
-        if: always()
+      - name: Upload Screenshots
+        if: always() # ⭐ ALWAYS UPLOAD SCREENSHOTS!
         uses: actions/upload-artifact@v4
         with:
           name: test-screenshots
           path: cypress/reports/screenshots
           retention-days: 14
 
-      - name: Upload Test Videos
-        if: always()
+      - name: Upload Videos
+        if: always() # ⭐ ALWAYS UPLOAD VIDEOS!
         uses: actions/upload-artifact@v4
         with:
           name: test-videos
           path: cypress/reports/videos
           retention-days: 14
 
+      # ⭐ MARK BUILD AS FAILED BUT REPORT STILL PUBLISHED!
       - name: Preserve overall job status
-        run: exit ${{ steps.run-tests.outcome == 'failure' && 1 || 0 }}
+        if: always()
+        run: |
+          if [ "${{ steps.run-tests.outcome }}" = "failure" ]; then
+            echo "⚠️ Tests failed — but report was published!"
+            exit 1 # ⭐ Shows build as FAILED — HONEST!
+          else
+            echo "✅ All tests passed!"
+            exit 0
+          fi
