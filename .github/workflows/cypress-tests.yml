@@ -41,22 +41,27 @@ jobs:
         run: npm run test-ci
         env:
           CI: true
-        continue-on-error: true # ⭐ KEEP RUNNING EVEN IF TESTS FAIL!
+        continue-on-error: true
 
-      # ⭐ UPLOAD & DEPLOY RUNS REGARDLESS OF PASS/FAIL!
+      # 🔍 DEBUG: See EXACTLY what was created
+      - name: List report files
+        if: always()
+        run: ls -laR cypress/reports/
+
+      # ✅ UPLOAD FROM CORRECT FOLDER — /html!
       - name: Upload Report to GitHub Pages
-        if: always() # ⭐ ALWAYS RUN — PASS OR FAIL!
+        if: always()
         uses: actions/upload-pages-artifact@v3
         with:
-          path: cypress/reports
+          path: cypress/reports/html  # ⭐ CRITICAL — index.html lives HERE!
 
       - name: Deploy Live Report
         id: deployment
-        if: always() # ⭐ ALWAYS DEPLOY!
+        if: always()
         uses: actions/deploy-pages@v4
 
       - name: Upload Screenshots
-        if: always() # ⭐ ALWAYS UPLOAD SCREENSHOTS!
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-screenshots
@@ -64,21 +69,18 @@ jobs:
           retention-days: 14
 
       - name: Upload Videos
-        if: always() # ⭐ ALWAYS UPLOAD VIDEOS!
+        if: always()
         uses: actions/upload-artifact@v4
         with:
           name: test-videos
           path: cypress/reports/videos
           retention-days: 14
 
-      # ⭐ MARK BUILD AS FAILED BUT REPORT STILL PUBLISHED!
       - name: Preserve overall job status
         if: always()
         run: |
           if [ "${{ steps.run-tests.outcome }}" = "failure" ]; then
-            echo "⚠️ Tests failed — but report was published!"
-            exit 1 # ⭐ Shows build as FAILED — HONEST!
+            exit 1
           else
-            echo "✅ All tests passed!"
             exit 0
           fi
